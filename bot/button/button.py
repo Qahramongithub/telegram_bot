@@ -1,6 +1,6 @@
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 from aiogram.types import KeyboardButton, WebAppInfo, InlineKeyboardButton
-from db.models import Branches,session
+from db.models import Branche,session
 from sqlalchemy import select
 
 def phone_button():
@@ -51,7 +51,7 @@ def branches_button():
     rkb.add(*[
         KeyboardButton(text="fillial qo'shish"),
     ])
-    result =session.execute(select(Branches.title))
+    result =session.execute(select(Branche.title))
     filiallar = [row[0] for row in result.all()]
     if filiallar:
         rkb.add(*[KeyboardButton(text=title) for title in filiallar])

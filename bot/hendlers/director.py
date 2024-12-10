@@ -1,12 +1,14 @@
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
-from db.models import Branches,session,User
+from db.models import Branche,session,User
 from sqlalchemy import select, delete, insert
 from bot.button.button import admin_button, branches_button, back_button,branch_button,delete_button
 from bot.state import DirectorsState
 
 director_router = Router()
+@director_router.message(DirectorsState.location,F.text=="🔙 Bekor qilish")
+@director_router.message(DirectorsState.new_location,F.text=="🔙 Bekor qilish")
 @director_router.message(DirectorsState.new_branch,F.text=="📁Bosh menuga qaytish")
 @director_router.message(DirectorsState.location,F.text=="🔙 Bekor qilish")
 @director_router.message(DirectorsState.branch_delete,F.text=="🔙 Bekor qilish")
@@ -91,7 +93,7 @@ async def director_menu(message: Message, state: FSMContext):
     radius = message.text
     data = await state.get_data()
     if radius.isdigit():
-        session.execute(insert(Branches).values(
+        session.execute(insert(Branche).values(
             title=data['name'],longitude=data['longitude'],latitude=data['latitude'],radius =radius)
         )
         session.commit()

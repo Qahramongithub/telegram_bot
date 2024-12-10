@@ -8,7 +8,7 @@ import math
 
 from bot.button.button import menu_button, back_button, moon_button
 from bot.state import EmployeesState
-from db.models import session, User, Atten, Login, Branches
+from db.models import session, User, Att, Login, Branche
 
 employees_router = Router()
 from math import radians, sin, cos, sqrt, atan2
@@ -51,7 +51,7 @@ async def employees(message: Message, state: FSMContext):
 async def employees(message: Message, state: FSMContext):
     status = message.text
     data = await state.get_data()
-    result = session.execute(select(Login.status))
+    result = session.execute(select(Login.admin_id))
     status1 = [row[0] for row in result.all()]
     for i in status1:
         if i == status or data['status'] == i:
@@ -66,7 +66,7 @@ async def employees(message: Message, state: FSMContext):
     await state.set_state(EmployeesState.employee_location)
 
 
-@employees_router.message(EmployeesState.employee_location, F.location)
+@employees_router.message(EmployeesState.employee_location,F.location)
 async def employees(message: Message, state: FSMContext):
     data = await state.get_data()
 
@@ -79,11 +79,11 @@ async def employees(message: Message, state: FSMContext):
     start_at = f"{datetime.now().hour}:{datetime.now().minute}:{datetime.now().second}"
     if message.location.live_period:
         if user:
-            results = session.execute(select(Branches.longitude, Branches.latitude, Branches.radius)).all()
+            results = session.execute(select(Branche.longitude, Branche.latitude, Branche.radius)).all()
 
             for lon, lat, r in results:
                 if calculate_distance(lon, lat, lon1, lat1) < r:
-                        session.execute(insert(Atten).values(
+                        session.execute(insert(Att).values(
                             time=start_at, date=date, user_id=user,
                             staff=data['name'],
                             status=data['status']
@@ -100,17 +100,19 @@ async def employees(message: Message, state: FSMContext):
         await message.answer("live lokatsiya kiriting !")
 
 
-
 @employees_router.message(EmployeesState.office, F.text == "Ofisdan ketdim")
 async def employees(message: Message, state: FSMContext):
     data = await state.get_data()
     date = f"{datetime.now().year}-{datetime.now().month}-{datetime.now().day}"
     start_at = f"{datetime.now().hour}:{datetime.now().minute}:{datetime.now().second}"
     user = session.execute(select(User.id).where(User.phone_number == data['phone'])).scalars().first()
+    datatime = f"{data} {start_at}"
     if date and user:
-        session.execute(insert(Atten).values(date=date, user_id=user,time=start_at,status=data['status'],staff=data['name']))
+        session.execute(insert(Att).values(date=date, user_id=user,datatime=datatime,time=start_at,status=data['status'],staff=data['name']))
         session.commit()
+        await message.answer("yaxshi dam oling")
         await state.set_state(EmployeesState.start_work)
+
 
     else:
         await message.answer("Siz bugun ishga kelmagansiz")
