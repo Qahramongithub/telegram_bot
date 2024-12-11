@@ -77,23 +77,23 @@ async def employees(message: Message, state: FSMContext):
 async def employees(message: Message, state: FSMContext):
     try:
         data = await state.get_data()
-
+        print("true")
         await state.update_data({'longitude': message.location.longitude})
         await state.update_data({'latitude': message.location.latitude})
         lon1 = message.location.longitude
         lat1 = message.location.latitude
         user = session.execute(select(User.id).where(User.phone_number == data['phone'])).scalars().first()
-        date_time = f"{datetime.now().year}-{datetime.now().month}-{datetime.now().day}"
+        date = f"{datetime.now().year}-{datetime.now().month}-{datetime.now().day}"
         start_at = f"{datetime.now().hour}:{datetime.now().minute}:{datetime.now().second}"
+        date_time =f"{date} {start_at}"
         if message.location.live_period:
             if user:
-                type = False
-
+                s = False
                 results = session.execute(select(Branche.longitude, Branche.latitude, Branche.radius)).all()
 
                 for lon, lat, r in results:
                     if calculate_distance(lon, lat, lon1, lat1) < r:
-                        type = True
+                        s = True
                         session.execute(insert(Att).values(
                             time=start_at, date=date, user_id=user,
                             staff=data['name'],
@@ -101,10 +101,9 @@ async def employees(message: Message, state: FSMContext):
                             status=data['status']
                         ))
                         session.commit()
+                        break
 
-                        await state.set_state(EmployeesState.office)
-
-                if not type:
+                if s == False:
                     await message.answer("Ishxonaga yaqinroq keling !", reply_markup=menu_button())
                     await state.set_state(EmployeesState.office)
 
