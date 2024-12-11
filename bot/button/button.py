@@ -18,7 +18,6 @@ def menu_button():
     rkb.add(*[
         KeyboardButton(text="Ofisga keldim"),
         KeyboardButton(text="Ofisdan ketdim"),
-        KeyboardButton(text="Hisobotlar"),
     ])
     rkb.as_markup(resize_keyboard=True)
     rkb.adjust(1, 1,1)
@@ -29,9 +28,9 @@ def admin_button():
     rkb = ReplyKeyboardBuilder()
     rkb.add(*[
         KeyboardButton(text="Yangi ishchi qo'shish"),
-        KeyboardButton(text='Barcha ishchilar'),
+        KeyboardButton(text='Barcha ishchilar',web_app=WebAppInfo(url='https://darajadigitalhr.netlify.app/')),
         KeyboardButton(text='Barcha filiallar'),
-        # KeyboardButton(text='Statistika 📊', web_app=WebAppInfo(url='#')),
+        KeyboardButton(text='Statistika 📊', web_app=WebAppInfo(url='https://darajadigitalhr.netlify.app/')),
     ])
     rkb.adjust(2, 1, 1)
     return rkb.as_markup(resize_keyboard=True)

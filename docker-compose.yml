@@ -1,35 +1,38 @@
+version: '3.8'
 
 services:
+  # Telegram bot
   bot:
     build: .
+    container_name: telegram-bot
+    volumes:
+      - .:/app
     restart: always
-    ports:
-      - "8001:8000"
-
-
-    #    environment:
-#      TOKEN: 7149796467:AAF-Dcj2_vEr5E_UGhVG3UBViU-AnonEC5Q
-#      DB_USER: postgres
-#      DB_NAME: postgres
-#      DB_HOST: pg
-#      DB_PORT: 5432
-#      DB_PASSWORD: 1
-#      PAYMENT_CLICK_TOKEN: 398062629:TEST:999999999_F91D8F69C042267444B74CC0B3C747757EB0E065
-
+#    environment:
+#      - TOKEN=7149796467:AAF-Dcj2_vEr5E_UGhVG3UBViU-AnonEC5Q
+#      - DB_USER=postgres
+#      - DB_NAME=postgres
+#      - DB_HOST=production_db  # PostgreSQL konteyneri nomi
+#      - DB_PORT=5432  # PostgreSQL ning default porti
+#      - DB_PASSWORD=Developer2024
+#      - PAYMENT_CLICK_TOKEN=398062629:TEST:999999999_F91D8F69C042267444B74CC0B3C747757EB0E065
     depends_on:
       - production_db
 
+  # PostgreSQL database
   production_db:
     image: postgres:alpine
+    container_name: production_db
     restart: always
     environment:
       POSTGRES_PASSWORD: Developer2024
+      POSTGRES_USER: developer
+      POSTGRES_DB: production_db
       TZ: Asia/Tashkent
     ports:
-      - "10075:10075"
+      - "10075:10075"  # 10075 portini PostgreSQLning 5432 portiga bog'lash
     volumes:
       - pg_data:/var/lib/postgresql/data/
-
 
 volumes:
   pg_data:

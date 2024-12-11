@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Session
 from sqlalchemy.orm import Mapped, mapped_column
-
+import psycopg2
 load_dotenv()
 
 DB_USER = os.getenv("DB_USER")
@@ -30,6 +30,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     staff: Mapped[str] = mapped_column()
     phone_number: Mapped[str] = mapped_column()
+    price : Mapped[float] = mapped_column()
 
     def __repr__(self):
         return f'User(id{self.id}, staff{self.staff})'
@@ -56,7 +57,7 @@ class Att(Base):
     staff: Mapped[str] = mapped_column()
     status: Mapped[str] = mapped_column()
     time: Mapped[str] = mapped_column()
-    datatime: Mapped[str] = mapped_column()
+    date_time: Mapped[str] = mapped_column()
     user_id: Mapped[int] = mapped_column()
 
 class Finance(Base):

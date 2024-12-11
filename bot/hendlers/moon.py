@@ -1,3 +1,4 @@
+import uvicorn
 moon=[
     'Yanvar',
     'Fevral',

@@ -25,3 +25,4 @@ class DirectorsState(StatesGroup):
     name = State()
     phone = State()
     new_branch = State()
+    price=State()
