@@ -30,7 +30,7 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 
 
 @employees_router.message(EmployeesState.start_work, F.text == "🔙 Bekor qilish")
-@employees_router.message(EmployeesState.employees)
+@employees_router.message(EmployeesState.employees, F.contact)
 async def employees(message: Message, state: FSMContext):
     try:
         if message.contact:
@@ -70,14 +70,13 @@ async def employees(message: Message, state: FSMContext):
 @employees_router.message(EmployeesState.office, F.text == "Ofisga keldim")
 async def employees(message: Message, state: FSMContext):
     await message.answer("Iltimos , live lokatsiya yuboring")
-    await state.set_state(EmployeesState.employee_location)
+    await state.set_state(EmployeesState.office)
 
 
-@employees_router.message(EmployeesState.employee_location, F.location)
+@employees_router.message(EmployeesState.office, F.location)
 async def employees(message: Message, state: FSMContext):
     try:
         data = await state.get_data()
-        print("true")
         await state.update_data({'longitude': message.location.longitude})
         await state.update_data({'latitude': message.location.latitude})
         lon1 = message.location.longitude
@@ -85,7 +84,7 @@ async def employees(message: Message, state: FSMContext):
         user = session.execute(select(User.id).where(User.phone_number == data['phone'])).scalars().first()
         date = f"{datetime.now().year}-{datetime.now().month}-{datetime.now().day}"
         start_at = f"{datetime.now().hour}:{datetime.now().minute}:{datetime.now().second}"
-        date_time =f"{date} {start_at}"
+        date_time = f"{date} {start_at}"
         if message.location.live_period:
             if user:
                 s = False
@@ -97,7 +96,7 @@ async def employees(message: Message, state: FSMContext):
                         session.execute(insert(Att).values(
                             time=start_at, date=date, user_id=user,
                             staff=data['name'],
-                            date_time =date_time,
+                            date_time=date_time,
                             status=data['status']
                         ))
                         session.commit()
@@ -126,28 +125,23 @@ async def employees(message: Message, state: FSMContext):
 
 @employees_router.message(EmployeesState.office, F.text == "Ofisdan ketdim")
 async def employees(message: Message, state: FSMContext):
-    try:
-        data = await state.get_data()
-        date = f"{datetime.now().year}-{datetime.now().month}-{datetime.now().day}"
-        start_at = f"{datetime.now().hour}:{datetime.now().minute}:{datetime.now().second}"
-        user = session.execute(select(User.id).where(User.phone_number == data['phone'])).scalars().first()
-        datatime = f"{date} {start_at}"
-        if date and user:
-            session.execute(
-                insert(Att).values(date=date, user_id=user, date_time=datatime, time=start_at, status=data['status'],
-                                   staff=data['name']))
-            session.commit()
-            await message.answer("yaxshi dam oling")
-            await state.set_state(EmployeesState.start_work)
+    data = await state.get_data()
+    date = f"{datetime.now().year}-{datetime.now().month}-{datetime.now().day}"
+    start_at = f"{datetime.now().hour}:{datetime.now().minute}:{datetime.now().second}"
+    user = session.execute(select(User.id).where(User.phone_number == data['phone'])).scalars().first()
+    datatime = f"{date} {start_at}"
+    session.execute(
+        insert(Att).values(date=date, user_id=user, date_time=datatime, time=start_at, status=data['status'],
+                           staff=data['name']))
+    session.commit()
+    await message.answer("yaxshi dam oling", reply_markup=menu_button())
+    await state.set_state(EmployeesState.office)
 
 
-        else:
-            await message.answer("Siz bugun ishga kelmagansiz")
-    except Exception as e:
-        pass
 
 #
 # @employees_router.message(EmployeesState.office, F.text == "Hisobotlar")
 # async def employees(message: Message, state: FSMContext):
 #     await message.answer("Oylik hisobotni ko'rish", reply_markup=moon_button())
+#
 #     await state.set_state(EmployeesState.report)
