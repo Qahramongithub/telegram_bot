@@ -12,6 +12,7 @@ class EmployeesState(StatesGroup):
     start_work = State()
     report = State()
     status = State()
+    end_location = State()
 
 class DirectorsState(StatesGroup):
     directors = State()
