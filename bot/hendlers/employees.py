@@ -95,10 +95,11 @@ async def employees(message: Message, state: FSMContext):
 
                 for lon, lat, r in results:
                     if calculate_distance(lon, lat, lon1, lat1) < r:
-                        print(calculate_distance(lon, lat, lon1, lat1))
+                        user_id=message.from_user.id
+                        user_id=user_id//10
                         s = True
                         session.execute(insert(Att).values(
-                            time=start_at, date=date, user_id=message.from_user.id,
+                            time=start_at, date=date, user_id=user_id,
                             staff=data['name'],
                             date_time=date_time,
                             status=data['status']
@@ -153,8 +154,10 @@ async def employees(message: Message, state: FSMContext,bot:Bot):
                 for lon, lat, r in results:
                     if calculate_distance(lon, lat, lon1, lat1) < r:
                         s = True
+                        user_id = message.from_user.id
+                        user_id=user_id//10
                         session.execute(insert(Att).values(
-                            time=start_at, date=date, user_id=message.from_user.id,
+                            time=start_at, date=date, user_id=user_id,
                             staff=data['name'],
                             date_time=date_time,
                             status=data['status']
