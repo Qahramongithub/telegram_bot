@@ -1,7 +1,7 @@
 import os
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, BigInteger
+from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, declared_attr, Session
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -15,7 +15,7 @@ DB_PORT = os.getenv("DB_PORT")
 
 
 engine = create_engine(
-    'postgresql+psycopg2://developer:Developer2024@postgresql-188855-0.cloudclusters.net:10075/locations_db'
+    f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:10075/{DB_NAME}'
 )
 session = Session(bind=engine)
 
@@ -27,8 +27,9 @@ class Base(DeclarativeBase):
 
 class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
-    staff: Mapped[str] = mapped_column()
-    phone_number: Mapped[str] = mapped_column()
+    staff: Mapped[str] = mapped_column(nullable=True)
+    phone_number: Mapped[str] = mapped_column(nullable=True)
+    status: Mapped[str] = mapped_column(nullable=True)
 
 
     def __repr__(self):
@@ -37,18 +38,11 @@ class User(Base):
 class Branche(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(nullable=True)
-    latitude : Mapped[float] = mapped_column()
-    longitude : Mapped[float] = mapped_column()
-    radius : Mapped[int] = mapped_column()
+    latitude : Mapped[float] = mapped_column(nullable=True)
+    longitude : Mapped[float] = mapped_column(nullable=True)
+    radius : Mapped[int] = mapped_column(nullable=True)
+    status: Mapped[str] = mapped_column(nullable=True)
 
-# class Employee(Base):
-#     id: Mapped[int] = mapped_column(primary_key=True)
-#     user_id: Mapped[int] = mapped_column(ForeignKey('users.id', ondelete='CASCADE'))
-#     date : Mapped[str] = mapped_column()
-#     start_at: Mapped[str] = mapped_column()
-#     latitude : Mapped[float] = mapped_column()
-#     longitude : Mapped[float] = mapped_column()
-#     status : Mapped[str] = mapped_column(unique=True)
 
 class Att(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -59,13 +53,6 @@ class Att(Base):
     date_time: Mapped[str] = mapped_column(nullable=True)
     user_id: Mapped[str] = mapped_column(nullable=True)
 
-class Finance(Base):
-    id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(nullable=True)
-    date: Mapped[str] = mapped_column(nullable=True)
-    status: Mapped[str] = mapped_column(unique=True)
-    created_at: Mapped[str] = mapped_column(nullable=True)
-    price: Mapped[float] = mapped_column(nullable=True)
 
 class Login(Base):
     id: Mapped[int] = mapped_column(primary_key=True)

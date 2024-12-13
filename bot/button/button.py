@@ -28,11 +28,11 @@ def admin_button():
     rkb = ReplyKeyboardBuilder()
     rkb.add(*[
         KeyboardButton(text="Yangi ishchi qo'shish"),
-        KeyboardButton(text='Barcha ishchilar',web_app=WebAppInfo(url='https://darajadigitalhr.netlify.app/')),
+        # KeyboardButton(text='Barcha ishchilar',web_app=WebAppInfo(url='https://darajadigitalhr.netlify.app/')),
         KeyboardButton(text='Barcha filiallar'),
-        KeyboardButton(text='Statistika 📊', web_app=WebAppInfo(url='https://darajadigitalhr.netlify.app/')),
+        KeyboardButton(text='Statistika 📊', web_app=WebAppInfo(url='https://darajalocation.netlify.app')),
     ])
-    rkb.adjust(2, 1, 1)
+    rkb.adjust(1, 1, 1)
     return rkb.as_markup(resize_keyboard=True)
 
 
@@ -45,12 +45,12 @@ def location_button():
     return rkb.as_markup(resize_keyboard=True)
 
 
-def branches_button():
+def branches_button(status):
     rkb = ReplyKeyboardBuilder()
     rkb.add(*[
         KeyboardButton(text="fillial qo'shish"),
     ])
-    result =session.execute(select(Branche.title))
+    result =session.execute(select(Branche.title).where(Branche.status==status))
     filiallar = [row[0] for row in result.all()]
     if filiallar:
         rkb.add(*[KeyboardButton(text=title) for title in filiallar])

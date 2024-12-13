@@ -18,7 +18,6 @@ async def start_bot(message: Message, state: FSMContext):
                          "Iltimos, ismingizni lotin harflarida kiriting")
     await state.set_state(UserState.name)
 
-
 @start_router.message(UserState.name)
 async def name_bot_func(message: Message, state: FSMContext):
     await state.update_data({"name": message.text})

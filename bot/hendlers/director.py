@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
-from db.models import Branche, session, User
+from db.models import Branche, session, User, Login
 from sqlalchemy import select, delete, insert
 from bot.button.button import admin_button, branches_button, back_button, branch_button, delete_button
 from bot.state import DirectorsState
@@ -10,24 +10,31 @@ import re
 director_router = Router()
 
 
-@director_router.message(DirectorsState.location, F.text == "🔙 Bekor qilish")
-@director_router.message(DirectorsState.new_location, F.text == "🔙 Bekor qilish")
-@director_router.message(DirectorsState.new_branch, F.text == "📁Bosh menuga qaytish")
-@director_router.message(DirectorsState.location, F.text == "🔙 Bekor qilish")
-@director_router.message(DirectorsState.branch_delete, F.text == "🔙 Bekor qilish")
-@director_router.message(DirectorsState.delete, F.text == "🔙 Bekor qilish")
-@director_router.message(DirectorsState.branches, F.text == '📁Bosh menuga qaytish')
-@director_router.message(DirectorsState.directors,F.contact)
+@director_router.message(DirectorsState.directors, F.contact)
 async def director(message: Message, state: FSMContext):
     try:
-        await message.answer("Menu ", reply_markup=admin_button())
+        await message.answer("Statu kiriting ! ", )
         # user_query = select(User.id).where(User.phone_number == data['phone'])
         # user = session.execute(user_query)
         # if user.exists():
         #     await message.answer("Menu ",reply_markup=admin_button())
         # else:
         #     await message.answer("Hodim topilmadi")
-        await state.set_state(DirectorsState.director_menu)
+        await state.set_state(DirectorsState.status)
+    except Exception as e:
+        pass
+
+@director_router.message(DirectorsState.status)
+async def director(message: Message, state: FSMContext):
+    try:
+        status = message.text
+        result = session.execute(select(Login.admin_id))
+        status1 = [row[0] for row in result.all()]
+        for i in status1:
+            if i == status:
+                await state.update_data({"status": i})
+                await message.answer("Siz tizimga muvaffaqiyatli kirdingiz", reply_markup=admin_button())
+                await state.set_state(DirectorsState.director_menu)
     except Exception as e:
         pass
 
@@ -45,7 +52,7 @@ async def director(message: Message, state: FSMContext):
 # async def director(message: Message, state: FSMContext):
 #     try:
 #         await state.update_data({"name": message.text})
-#         await message.answer("Yishchi oylik haqi kiritilsin !")
+#         await message.answer("Yishchi statusi kiritilsin !")
 #         await state.set_state(DirectorsState.price)
 #     except Exception as e:
 #         pass
@@ -53,7 +60,7 @@ async def director(message: Message, state: FSMContext):
 @director_router.message(DirectorsState.name)
 async def director_name_handler(message: Message, state: FSMContext):
     try:
-        price = message.text
+        status = message.text
 
         # Foydalanuvchidan ismni saqlash
         # await state.update_data({"price": message.text})
@@ -79,7 +86,7 @@ async def director_phone_handler(message: Message, state: FSMContext):
         if re.fullmatch(r"998\d{9}", phone):
             try:
                 # Ma'lumotni bazaga yozish
-                session.execute(insert(User).values(phone_number=phone, staff=data['name']))
+                session.execute(insert(User).values(phone_number=phone, staff=data['name'], status=data['status']))
                 session.commit()
 
                 await message.answer("Yangi ishchi qo'shildi", reply_markup=admin_button())
@@ -98,7 +105,9 @@ async def director_phone_handler(message: Message, state: FSMContext):
 @director_router.message(DirectorsState.director_menu, F.text == "Barcha filiallar")
 async def director_menu(message: Message, state: FSMContext):
     try:
-        await message.answer("Menu ", reply_markup=branches_button())
+        data = await state.get_data()
+        status = data['status']
+        await message.answer("Menu ", reply_markup=branches_button(status))
         await state.set_state(DirectorsState.branches)
     except Exception as e:
         pass
@@ -128,6 +137,14 @@ async def director_menu(message: Message, state: FSMContext):
         pass
 
 
+# @director_router.message(DirectorsState.status)
+# async def director_menu(message: Message, state: FSMContext):
+#     await state.update_data({'status': message.text})
+#     await state.update_data({'longitude': message.location.longitude})
+#     await state.update_data({'latitude': message.location.latitude})
+#     await message.answer(" filial Statusni kiriting")
+#     await state.set_state(DirectorsState.new_location)
+
 @director_router.message(DirectorsState.new_location, F.location)
 async def director_menu(message: Message, state: FSMContext):
     try:
@@ -144,12 +161,15 @@ async def director_menu(message: Message, state: FSMContext):
     try:
         radius = message.text
         data = await state.get_data()
+        status = data['status']
         if radius.isdigit():
+
             session.execute(insert(Branche).values(
-                title=data['name'], longitude=data['longitude'], latitude=data['latitude'], radius=radius)
+                title=data['name'], longitude=data['longitude'], latitude=data['latitude'], radius=radius,
+                status=status)
             )
             session.commit()
-            await message.answer("Yangi filial muvaffaqqiyatli qo'shildi", reply_markup=branches_button())
+            await message.answer("Yangi filial muvaffaqqiyatli qo'shildi", reply_markup=branches_button(status))
             await state.set_state(DirectorsState.new_branch)
         else:
             await message.answer("Faqat raqamlardan foydalaning !")
@@ -194,7 +214,17 @@ async def branch_delete(message: Message, state: FSMContext):
             await message.answer(f"Filial '{branch}' o'chirildi.")
         except Exception as e:
             pass
-
     except Exception as e:
+
         session.rollback()
         await message.answer("Error")
+@director_router.message(DirectorsState.location,F.text == "🔙 Bekor qilish")
+@director_router.message(DirectorsState.new_location,F.text == "🔙 Bekor qilish")
+@director_router.message(DirectorsState.new_branch, F.text == "📁Bosh menuga qaytish")
+@director_router.message(DirectorsState.location,F.text == "🔙 Bekor qilish")
+@director_router.message(DirectorsState.branch_delete, F.text == "🔙 Bekor qilish")
+@director_router.message(DirectorsState.delete,F.text == "🔙 Bekor qilish")
+@director_router.message(DirectorsState.branches,F.text == '📁Bosh menuga qaytish')
+async def director(message: Message, state: FSMContext):
+    await message.answer("Menu ! ", reply_markup=admin_button())
+    await state.set_state(DirectorsState.director_menu)
