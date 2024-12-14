@@ -9,6 +9,18 @@ import re
 
 director_router = Router()
 
+@director_router.message(DirectorsState.name,F.text=="🔙 Bekor qilish")
+@director_router.message(DirectorsState.location,F.text == "🔙 Bekor qilish")
+@director_router.message(DirectorsState.new_location,F.text == "🔙 Bekor qilish")
+@director_router.message(DirectorsState.new_branch, F.text == "📁Bosh menuga qaytish")
+@director_router.message(DirectorsState.location,F.text == "🔙 Bekor qilish")
+@director_router.message(DirectorsState.branch_delete, F.text == "🔙 Bekor qilish")
+@director_router.message(DirectorsState.delete,F.text == "🔙 Bekor qilish")
+@director_router.message(DirectorsState.branches,F.text == "📁Bosh menuga qaytish")
+@director_router.message(DirectorsState.phone,F.text=="🔙 Bekor qilish")
+async def director(message: Message, state: FSMContext):
+    await message.answer("Menu ! ", reply_markup=admin_button())
+    await state.set_state(DirectorsState.director_menu)
 
 @director_router.message(DirectorsState.directors, F.contact)
 async def director(message: Message, state: FSMContext):
@@ -42,7 +54,7 @@ async def director(message: Message, state: FSMContext):
 @director_router.message(DirectorsState.director_menu, F.text == "Yangi ishchi qo'shish")
 async def director(message: Message, state: FSMContext):
     try:
-        await message.answer("Yangi ishchi ism ")
+        await message.answer("Yangi ishchi ism ",reply_markup=back_button())
         await state.set_state(DirectorsState.name)
     except Exception as e:
         pass
@@ -66,7 +78,7 @@ async def director_name_handler(message: Message, state: FSMContext):
         # await state.update_data({"price": message.text})
         await state.update_data({"name": message.text})
 
-        await message.answer("Yangi ishchi telefon raqamini kiriting\nMasalan: 998(94)5421234")
+        await message.answer("Yangi ishchi telefon raqamini kiriting\nMasalan: 998(94)5421234",reply_markup=back_button())
         await state.set_state(DirectorsState.phone)
     # else:
     #     await message.answer("narx raqamlarda kiritilsin !")
@@ -218,13 +230,3 @@ async def branch_delete(message: Message, state: FSMContext):
 
         session.rollback()
         await message.answer("Error")
-@director_router.message(DirectorsState.location,F.text == "🔙 Bekor qilish")
-@director_router.message(DirectorsState.new_location,F.text == "🔙 Bekor qilish")
-@director_router.message(DirectorsState.new_branch, F.text == "📁Bosh menuga qaytish")
-@director_router.message(DirectorsState.location,F.text == "🔙 Bekor qilish")
-@director_router.message(DirectorsState.branch_delete, F.text == "🔙 Bekor qilish")
-@director_router.message(DirectorsState.delete,F.text == "🔙 Bekor qilish")
-@director_router.message(DirectorsState.branches,F.text == '📁Bosh menuga qaytish')
-async def director(message: Message, state: FSMContext):
-    await message.answer("Menu ! ", reply_markup=admin_button())
-    await state.set_state(DirectorsState.director_menu)

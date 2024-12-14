@@ -13,7 +13,6 @@ TOKEN = getenv("TOKEN")
 
 
 
-
 async def main() -> None:
     bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
