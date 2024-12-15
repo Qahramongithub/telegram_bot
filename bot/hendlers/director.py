@@ -98,11 +98,13 @@ async def director_phone_handler(message: Message, state: FSMContext):
         if re.fullmatch(r"998\d{9}", phone):
             try:
                 # Ma'lumotni bazaga yozish
+                status=data['status']
                 session.execute(insert(User).values(phone_number=phone, staff=data['name'], status=data['status']))
                 session.commit()
 
                 await message.answer("Yangi ishchi qo'shildi", reply_markup=admin_button())
                 await state.clear()
+                await state.update_data({"status":status})
                 await state.set_state(DirectorsState.director_menu)
             except Exception as e:
                 await message.answer(f"Xatolik yuz berdi: {e}")
