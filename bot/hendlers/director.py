@@ -25,7 +25,7 @@ async def director(message: Message, state: FSMContext):
 @director_router.message(DirectorsState.directors, F.contact)
 async def director(message: Message, state: FSMContext):
     try:
-        await message.answer("Statu kiriting ! ", )
+        await message.answer("Status kiriting ! ", )
         # user_query = select(User.id).where(User.phone_number == data['phone'])
         # user = session.execute(user_query)
         # if user.exists():
@@ -54,7 +54,7 @@ async def director(message: Message, state: FSMContext):
 @director_router.message(DirectorsState.director_menu, F.text == "Yangi ishchi qo'shish")
 async def director(message: Message, state: FSMContext):
     try:
-        await message.answer("Yangi ishchi ism ",reply_markup=back_button())
+        await message.answer("Yangi ishchi ismi ",reply_markup=back_button())
         await state.set_state(DirectorsState.name)
     except Exception as e:
         pass
@@ -78,7 +78,7 @@ async def director_name_handler(message: Message, state: FSMContext):
         # await state.update_data({"price": message.text})
         await state.update_data({"name": message.text})
 
-        await message.answer("Yangi ishchi telefon raqamini kiriting\nMasalan: 998(94)5421234",reply_markup=back_button())
+        await message.answer("Yangi ishchi telefon raqamini kiriting\nMasalan: 998945421234",reply_markup=back_button())
         await state.set_state(DirectorsState.phone)
     # else:
     #     await message.answer("narx raqamlarda kiritilsin !")
